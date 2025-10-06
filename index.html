@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#3a6ff2" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="かるた分析ツール" />
+    <title>かるた試合後分析ツール</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="icons/icon-180.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>かるた試合後分析ツール</h1>
+      <p class="subtitle">試合で取った札を記録して、陣形と決まり字を振り返りましょう。</p>
+    </header>
+    <main>
+      <section class="actions">
+        <button type="button" id="open-entry-dialog" class="primary">取札を追加</button>
+        <button type="button" id="download-board" class="secondary">画像としてダウンロード</button>
+      </section>
+
+      <section class="board-section">
+        <h2>配置図</h2>
+        <div class="board-scroll">
+          <div id="board" class="board-grid" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="records-section">
+        <h2>入力済みの札</h2>
+        <p class="records-hint">入力済みの札はここに一覧表示されます。不要になった場合は削除できます。</p>
+        <ul id="record-list" class="record-list" aria-live="polite"></ul>
+      </section>
+    </main>
+
+    <div id="entry-dialog" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="dialog-title">取札を追加</h2>
+          <button type="button" class="icon-button" id="close-dialog" aria-label="閉じる">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="step-indicator" id="step-indicator"></div>
+
+          <div class="dialog-step" data-step="0">
+            <h3>1. 札を選ぶ</h3>
+            <p class="step-note">一覧から決まり字を選択</p>
+            <label class="field-label" for="kimariji-search">検索</label>
+            <input type="search" id="kimariji-search" class="text-input" placeholder="ひらがなで入力" autocomplete="off" />
+            <div id="kimariji-list" class="kimariji-list" role="listbox" aria-label="決まり字一覧"></div>
+          </div>
+
+          <div class="dialog-step" data-step="1">
+            <h3>2. 取った場所</h3>
+            <p class="step-note">取った/取られた場所をタップ</p>
+            <div id="location-picker" class="location-picker" role="listbox" aria-label="札を取った場所"></div>
+          </div>
+
+          <div class="dialog-step" data-step="2">
+            <h3>3. 何字決まり？</h3>
+            <p class="step-note">取ったときの決まり字を選択</p>
+            <div id="decision-buttons" class="option-row" role="radiogroup" aria-label="何字決まり"></div>
+          </div>
+
+          <div class="dialog-step" data-step="3">
+            <h3>4. どちらが取った？</h3>
+            <p class="step-note">札を取ったのが自分か相手かを選択</p>
+            <div id="owner-buttons" class="option-row" role="radiogroup" aria-label="誰が取ったか"></div>
+            <div class="summary" id="entry-summary"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="secondary" id="back-step">戻る</button>
+          <button type="button" class="primary" id="next-step">次へ</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="dialog-backdrop" class="modal-backdrop hidden"></div>
+
+    <template id="record-item-template">
+      <li class="record-item">
+        <div class="record-main">
+          <span class="record-kimariji"></span>
+          <span class="record-meta"></span>
+        </div>
+        <button type="button" class="icon-button" data-action="remove" aria-label="削除">×</button>
+      </li>
+    </template>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
