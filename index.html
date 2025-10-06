@@ -7,15 +7,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="かるた分析ツール" />
-    <title>かるた試合後分析ツール</title>
+    <title>かるた試合後分析</title>
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="apple-touch-icon" href="icons/icon-180.png" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header class="app-header">
-      <h1>かるた試合後分析ツール</h1>
-      <p class="subtitle">試合で取った札を記録して、陣形と決まり字を振り返りましょう。</p>
+      <h1>かるた試合後分析</h1>
     </header>
     <main>
       <section class="actions">
@@ -44,18 +43,13 @@
           <button type="button" class="icon-button" id="close-dialog" aria-label="閉じる">&times;</button>
         </div>
         <div class="modal-body">
-          <div class="step-indicator" id="step-indicator"></div>
-
           <div class="dialog-step" data-step="0">
             <h3>1. 札を選ぶ</h3>
-            <label class="field-label" for="kimariji-search">検索</label>
-            <input type="search" id="kimariji-search" class="text-input" placeholder="ひらがなで入力" autocomplete="off" />
             <div id="kimariji-list" class="kimariji-list" role="listbox" aria-label="決まり字一覧"></div>
           </div>
 
           <div class="dialog-step" data-step="1">
-            <h3>2. 取った場所</h3>
-            <p class="step-note">取った/取られた場所をタップ</p>
+            <h3>2. 取った/取られた場所</h3>
             <div id="location-picker" class="location-picker" role="listbox" aria-label="札を取った場所"></div>
           </div>
 

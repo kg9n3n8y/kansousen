@@ -82,9 +82,7 @@ function cacheElements() {
   elements.closeDialogButton = document.getElementById('close-dialog');
   elements.nextButton = document.getElementById('next-step');
   elements.backButton = document.getElementById('back-step');
-  elements.stepIndicator = document.getElementById('step-indicator');
   elements.dialogSteps = Array.from(document.querySelectorAll('.dialog-step'));
-  elements.kimarijiSearch = document.getElementById('kimariji-search');
   elements.kimarijiList = document.getElementById('kimariji-list');
   elements.locationPicker = document.getElementById('location-picker');
   elements.decisionButtons = document.getElementById('decision-buttons');
@@ -104,8 +102,6 @@ function validateEssentialElements() {
     'closeDialogButton',
     'nextButton',
     'backButton',
-    'stepIndicator',
-    'kimarijiSearch',
     'kimarijiList',
     'locationPicker',
     'decisionButtons',
@@ -200,7 +196,6 @@ function attachEventHandlers() {
   elements.backButton.addEventListener('click', handleBackStep);
   elements.downloadButton.addEventListener('click', downloadBoardAsImage);
 
-  elements.kimarijiSearch.addEventListener('input', renderKimarijiOptions);
   elements.kimarijiList.addEventListener('click', handleKimarijiClick);
   elements.locationPicker.addEventListener('click', handleLocationClick);
   elements.decisionButtons.addEventListener('click', handleDecisionClick);
@@ -227,32 +222,28 @@ function openDialog() {
   elements.modal.classList.remove('hidden');
   elements.modalBackdrop.classList.remove('hidden');
   document.body.classList.add('modal-open');
-  elements.kimarijiSearch.focus();
+  const firstOption = elements.kimarijiList.querySelector('button');
+  if (firstOption) {
+    firstOption.focus();
+  }
 }
 
 function closeDialog() {
   elements.modal.classList.add('hidden');
   elements.modalBackdrop.classList.add('hidden');
   document.body.classList.remove('modal-open');
-  elements.kimarijiSearch.value = '';
 }
 
 function renderKimarijiOptions() {
-  const filter = elements.kimarijiSearch.value.trim();
-  const filterNormalized = filter;
   const used = new Set(state.entries.map((entry) => entry.kimariji));
   const fragment = document.createDocumentFragment();
 
-  const candidates = KIMARIJI_LIST.filter((ki) => {
-    if (used.has(ki)) return false;
-    if (!filterNormalized) return true;
-    return ki.startsWith(filterNormalized);
-  });
+  const candidates = KIMARIJI_LIST.filter((ki) => !used.has(ki));
 
   if (candidates.length === 0) {
     const empty = document.createElement('p');
     empty.className = 'step-note';
-    empty.textContent = filter ? '一致する札が見つかりませんでした。' : '選択できる札がありません。削除すると再度選択できます。';
+    empty.textContent = '選択できる札がありません。削除すると再度選択できます。';
     fragment.appendChild(empty);
   } else {
     candidates.forEach((kimariji) => {
@@ -374,14 +365,8 @@ function setActiveStep(stepIndex) {
   elements.dialogSteps.forEach((step, index) => {
     step.classList.toggle('active', index === stepIndex);
   });
-  updateStepIndicator();
   updateStepControls();
   maybeUpdateSummary();
-}
-
-function updateStepIndicator() {
-  const total = elements.dialogSteps.length;
-  elements.stepIndicator.textContent = `ステップ ${state.dialogStep + 1} / ${total}`;
 }
 
 function updateStepControls() {
