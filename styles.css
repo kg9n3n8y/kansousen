@@ -361,7 +361,7 @@ button.ghost:hover:not(:disabled) {
   background: #fff;
   padding: 0.65rem 0.75rem;
   text-align: center;
-  font-size: 1rem;
+  font-size: 0.95rem;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease;
 }
