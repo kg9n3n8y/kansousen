@@ -350,7 +350,6 @@ button.ghost:hover:not(:disabled) {
 .location-picker {
   display: grid;
   grid-template-columns: repeat(2, minmax(120px, 1fr));
-  border: 1px solid var(--border-color);
   border-radius: 16px;
   overflow: hidden;
   margin-top: 1rem;
