@@ -18,12 +18,18 @@
     </header>
     <main>
       <section class="actions">
-        <button type="button" id="open-entry-dialog" class="primary">取札を追加</button>
-        <button type="button" id="download-board" class="secondary">画像としてダウンロード</button>
+        <div class="actions-buttons">
+          <button type="button" id="open-entry-dialog" class="primary">取札を追加</button>
+          <button type="button" id="download-board" class="secondary">画像としてダウンロード</button>
+        </div>
+        <label for="board-title-input" class="board-title-field">
+          <input type="text" id="board-title-input" name="board-title-input" placeholder="画像に表示するメモを入力" autocomplete="off" />
+        </label>
       </section>
 
       <section class="board-section">
         <h2>配置図</h2>
+        <div id="board-title-display" class="board-title-display" aria-live="polite"></div>
         <div class="board-scroll">
           <div id="board" class="board-grid" aria-live="polite"></div>
         </div>

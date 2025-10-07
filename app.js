@@ -47,7 +47,8 @@ const LOCATION_BY_ID = BOARD_STRUCTURE.flat().reduce((acc, location, index) => {
 const state = {
   entries: [],
   dialogStep: 0,
-  currentEntry: null
+  currentEntry: null,
+  boardTitle: ''
 };
 
 const elements = {};
@@ -62,6 +63,7 @@ function init() {
     return;
   }
 
+  state.boardTitle = elements.boardTitleInput.value ?? '';
   state.currentEntry = createEmptyEntry();
   buildBoardStructure();
   buildLocationPicker();
@@ -70,6 +72,7 @@ function init() {
   attachEventHandlers();
   renderBoard();
   renderRecordList();
+  updateBoardTitleDisplay();
   updateDownloadState();
 }
 
@@ -78,6 +81,8 @@ function cacheElements() {
   elements.recordList = document.getElementById('record-list');
   elements.openDialogButton = document.getElementById('open-entry-dialog');
   elements.downloadButton = document.getElementById('download-board');
+  elements.boardTitleInput = document.getElementById('board-title-input');
+  elements.boardTitleDisplay = document.getElementById('board-title-display');
   elements.modal = document.getElementById('entry-dialog');
   elements.modalBackdrop = document.getElementById('dialog-backdrop');
   elements.closeDialogButton = document.getElementById('close-dialog');
@@ -98,6 +103,8 @@ function validateEssentialElements() {
     'recordList',
     'openDialogButton',
     'downloadButton',
+    'boardTitleInput',
+    'boardTitleDisplay',
     'modal',
     'modalBackdrop',
     'closeDialogButton',
@@ -196,6 +203,7 @@ function attachEventHandlers() {
   elements.nextButton.addEventListener('click', handleNextStep);
   elements.backButton.addEventListener('click', handleBackStep);
   elements.downloadButton.addEventListener('click', downloadBoardAsImage);
+  elements.boardTitleInput.addEventListener('input', handleBoardTitleInput);
 
   elements.kimarijiList.addEventListener('click', handleKimarijiClick);
   elements.locationPicker.addEventListener('click', handleLocationClick);
@@ -229,6 +237,19 @@ function preventDoubleTapZoom() {
     },
     { passive: false }
   );
+}
+
+function handleBoardTitleInput(event) {
+  const target = event.target;
+  if (!(target instanceof HTMLInputElement)) return;
+  state.boardTitle = target.value;
+  updateBoardTitleDisplay();
+}
+
+function updateBoardTitleDisplay() {
+  const title = state.boardTitle.trim();
+  elements.boardTitleDisplay.textContent = title;
+  elements.boardTitleDisplay.classList.toggle('is-visible', title.length > 0);
 }
 
 function openDialog() {
@@ -540,6 +561,10 @@ function downloadBoardAsImage() {
   const fontSize = 28;
   const charSpacing = 36;
   const fontWeight = '600';
+  const boardTitle = state.boardTitle.trim();
+  const titleFontSize = 34;
+  const titlePadding = 24;
+  const titleSpacingBelow = 12;
 
   const entriesByLocation = new Map();
   state.entries.forEach((entry) => {
@@ -567,7 +592,11 @@ function downloadBoardAsImage() {
   const columnWidths = columnMaxCounts.map((count) => (count > 0 ? baseWidth + (count - 1) * cardSpacing : baseWidth));
   const columnStarts = [0, columnWidths[0]];
   const canvasWidth = columnWidths.reduce((sum, width) => sum + width, 0);
-  const canvasHeight = rowHeight * rowCount;
+  const boardHeight = rowHeight * rowCount;
+  const hasTitle = boardTitle.length > 0;
+  const titleAreaHeight = hasTitle ? titleFontSize + titlePadding * 2 : 0;
+  const boardTop = hasTitle ? titleAreaHeight + titleSpacingBelow : 0;
+  const canvasHeight = boardTop + boardHeight;
   const scale = Math.min(2, window.devicePixelRatio || 1);
 
   const canvas = document.createElement('canvas');
@@ -579,12 +608,21 @@ function downloadBoardAsImage() {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
+  if (hasTitle) {
+    ctx.font = `${fontWeight} ${titleFontSize}px 'Rounded Mplus 1c', 'Yu Gothic', 'Noto Sans JP', sans-serif`;
+    ctx.fillStyle = '#1f1f27';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const titleY = titlePadding + titleFontSize / 2;
+    ctx.fillText(boardTitle, canvasWidth / 2, titleY);
+  }
+
   ctx.lineWidth = 1.5;
   ctx.strokeStyle = '#bfbfd0';
-  ctx.strokeRect(0.75, 0.75, canvasWidth - 1.5, canvasHeight - 1.5);
+  ctx.strokeRect(0.75, boardTop + 0.75, canvasWidth - 1.5, boardHeight - 1.5);
 
   for (let r = 1; r < rowCount; r += 1) {
-    const y = r * rowHeight + 0.75;
+    const y = boardTop + r * rowHeight + 0.75;
     ctx.beginPath();
     ctx.moveTo(0, y);
     ctx.lineTo(canvasWidth, y);
@@ -593,8 +631,8 @@ function downloadBoardAsImage() {
 
   const divisionX = columnWidths[0] + 0.75;
   ctx.beginPath();
-  ctx.moveTo(divisionX, 0);
-  ctx.lineTo(divisionX, canvasHeight);
+  ctx.moveTo(divisionX, boardTop);
+  ctx.lineTo(divisionX, boardTop + boardHeight);
   ctx.stroke();
 
   ctx.font = `${fontWeight} ${fontSize}px 'Rounded Mplus 1c', 'Yu Gothic', 'Noto Sans JP', sans-serif`;
@@ -605,7 +643,7 @@ function downloadBoardAsImage() {
     const location = LOCATION_BY_ID[entry.locationId];
     if (!location) return;
     const orderIndex = orderIndexByEntry.get(entry.id) ?? 0;
-    const rowStart = location.rowIndex * rowHeight;
+    const rowStart = boardTop + location.rowIndex * rowHeight;
     const columnStart = columnStarts[location.columnIndex];
     const columnWidth = columnWidths[location.columnIndex];
 

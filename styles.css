@@ -54,10 +54,47 @@ main {
 
 .actions {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.actions-buttons {
+  display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
   justify-content: center;
-  margin-bottom: 2.5rem;
+}
+
+.board-title-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: min(100%, 440px);
+  color: var(--muted-text);
+  font-size: 0.95rem;
+}
+
+.board-title-label {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.board-title-field input {
+  font: inherit;
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  color: var(--text-color);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.board-title-field input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(58, 111, 242, 0.2);
 }
 
 h3 {
@@ -139,6 +176,21 @@ button.ghost:hover:not(:disabled) {
   overflow-x: auto;
   padding-bottom: 0.5rem;
   -webkit-overflow-scrolling: touch;
+}
+
+.board-title-display {
+  margin: 0.25rem auto 0;
+  max-width: 640px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-color);
+  word-break: break-word;
+  display: none;
+}
+
+.board-title-display.is-visible {
+  display: block;
 }
 
 .board-grid {
@@ -486,7 +538,6 @@ button.ghost:hover:not(:disabled) {
 
 @media (max-width: 480px) {
   .actions {
-    flex-direction: column;
     align-items: stretch;
   }
 
