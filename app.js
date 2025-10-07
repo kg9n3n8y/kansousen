@@ -11,28 +11,28 @@ const KIMARIJI_LIST = [
 
 const BOARD_STRUCTURE = [
   [
-    { id: 'opponent-right-lower', label: '相手陣 右下段', columnIndex: 0 },
-    { id: 'opponent-left-lower', label: '相手陣 左下段', columnIndex: 1 }
+    { id: 'opponent-right-lower', label: '相手陣右下段', columnIndex: 0 },
+    { id: 'opponent-left-lower', label: '相手陣左下段', columnIndex: 1 }
   ],
   [
-    { id: 'opponent-right-middle', label: '相手陣 右中段', columnIndex: 0 },
-    { id: 'opponent-left-middle', label: '相手陣 左中段', columnIndex: 1 }
+    { id: 'opponent-right-middle', label: '相手陣右中段', columnIndex: 0 },
+    { id: 'opponent-left-middle', label: '相手陣左中段', columnIndex: 1 }
   ],
   [
-    { id: 'opponent-right-upper', label: '相手陣 右上段', columnIndex: 0 },
-    { id: 'opponent-left-upper', label: '相手陣 左上段', columnIndex: 1 }
+    { id: 'opponent-right-upper', label: '相手陣右上段', columnIndex: 0 },
+    { id: 'opponent-left-upper', label: '相手陣左上段', columnIndex: 1 }
   ],
   [
-    { id: 'self-left-upper', label: '自陣 左上段', columnIndex: 0 },
-    { id: 'self-right-upper', label: '自陣 右上段', columnIndex: 1 }
+    { id: 'self-left-upper', label: '自陣左上段', columnIndex: 0 },
+    { id: 'self-right-upper', label: '自陣右上段', columnIndex: 1 }
   ],
   [
-    { id: 'self-left-middle', label: '自陣 左中段', columnIndex: 0 },
-    { id: 'self-right-middle', label: '自陣 右中段', columnIndex: 1 }
+    { id: 'self-left-middle', label: '自陣左中段', columnIndex: 0 },
+    { id: 'self-right-middle', label: '自陣右中段', columnIndex: 1 }
   ],
   [
-    { id: 'self-left-lower', label: '自陣 左下段', columnIndex: 0 },
-    { id: 'self-right-lower', label: '自陣 右下段', columnIndex: 1 }
+    { id: 'self-left-lower', label: '自陣左下段', columnIndex: 0 },
+    { id: 'self-right-lower', label: '自陣右下段', columnIndex: 1 }
   ]
 ];
 
