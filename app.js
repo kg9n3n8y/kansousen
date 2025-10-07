@@ -55,6 +55,7 @@ const elements = {};
 const slotElements = new Map();
 
 function init() {
+  preventDoubleTapZoom();
   cacheElements();
   if (!validateEssentialElements()) {
     console.error('初期化に必要な要素が見つからなかったため、アプリを開始できません。');
@@ -207,6 +208,27 @@ function attachEventHandlers() {
       closeDialog();
     }
   });
+}
+
+function preventDoubleTapZoom() {
+  // Stop rapid consecutive taps from triggering zoom while leaving pinch zoom intact.
+  let lastTouchTime = 0;
+  document.addEventListener(
+    'touchend',
+    (event) => {
+      if (event.changedTouches.length > 1) return;
+      if (event.target instanceof HTMLElement) {
+        const interactiveTag = event.target.closest('input, textarea, select');
+        if (interactiveTag) return;
+      }
+      const now = Date.now();
+      if (now - lastTouchTime < 350) {
+        event.preventDefault();
+      }
+      lastTouchTime = now;
+    },
+    { passive: false }
+  );
 }
 
 function openDialog() {
