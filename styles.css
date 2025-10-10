@@ -67,6 +67,11 @@ main {
   justify-content: center;
 }
 
+#open-entry-dialog,
+#download-board {
+  min-width: 230px;
+}
+
 .board-title-field {
   display: flex;
   flex-direction: column;
