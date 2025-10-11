@@ -92,6 +92,24 @@
     </div>
 
     <div id="dialog-backdrop" class="modal-backdrop hidden"></div>
+    <div id="download-dialog" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="download-dialog-title">
+      <div class="modal-content download-dialog-content">
+        <div class="modal-header">
+          <h2 id="download-dialog-title">画像を保存</h2>
+          <button type="button" class="icon-button" id="close-download-dialog" aria-label="閉じる">&times;</button>
+        </div>
+        <div class="modal-body download-dialog-body">
+          <div class="download-preview-wrapper">
+            <img id="download-preview-image" src="" alt="ダウンロード用の盤面画像" loading="lazy" />
+          </div>
+          <p class="download-instruction" id="download-instruction-text">
+            画像を長押しまたは右クリックして保存してください。
+          </p>
+          <a id="download-direct-link" class="download-direct-link secondary" href="#" download>画像を保存</a>
+        </div>
+      </div>
+    </div>
+    <div id="download-dialog-backdrop" class="modal-backdrop hidden"></div>
     <div id="reset-confirm-dialog" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="reset-dialog-title">
       <div class="modal-content confirm-dialog-content">
         <h2 id="reset-dialog-title">登録内容をリセット</h2>

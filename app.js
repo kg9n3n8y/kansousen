@@ -104,6 +104,12 @@ function cacheElements() {
   elements.decisionButtons = document.getElementById('decision-buttons');
   elements.ownerButtons = document.getElementById('owner-buttons');
   elements.entrySummary = document.getElementById('entry-summary');
+  elements.downloadDialog = document.getElementById('download-dialog');
+  elements.downloadDialogBackdrop = document.getElementById('download-dialog-backdrop');
+  elements.closeDownloadDialogButton = document.getElementById('close-download-dialog');
+  elements.downloadPreviewImage = document.getElementById('download-preview-image');
+  elements.downloadInstructionText = document.getElementById('download-instruction-text');
+  elements.downloadDirectLink = document.getElementById('download-direct-link');
   elements.resetDialog = document.getElementById('reset-confirm-dialog');
   elements.resetDialogBackdrop = document.getElementById('reset-dialog-backdrop');
   elements.confirmResetButton = document.getElementById('confirm-reset');
@@ -199,6 +205,12 @@ function validateEssentialElements() {
     'decisionButtons',
     'ownerButtons',
     'entrySummary',
+    'downloadDialog',
+    'downloadDialogBackdrop',
+    'closeDownloadDialogButton',
+    'downloadPreviewImage',
+    'downloadInstructionText',
+    'downloadDirectLink',
     'resetDialog',
     'resetDialogBackdrop',
     'confirmResetButton',
@@ -214,7 +226,8 @@ function validateEssentialElements() {
 function updateModalOpenState() {
   const hasEntryDialog = elements.modal && !elements.modal.classList.contains('hidden');
   const hasResetDialog = elements.resetDialog && !elements.resetDialog.classList.contains('hidden');
-  document.body.classList.toggle('modal-open', hasEntryDialog || hasResetDialog);
+  const hasDownloadDialog = elements.downloadDialog && !elements.downloadDialog.classList.contains('hidden');
+  document.body.classList.toggle('modal-open', hasEntryDialog || hasResetDialog || hasDownloadDialog);
 }
 
 function createEmptyEntry() {
@@ -298,6 +311,8 @@ function attachEventHandlers() {
   elements.downloadButton.addEventListener('click', downloadBoardAsImage);
   elements.resetButton.addEventListener('click', openResetDialog);
   elements.copyUrlButton.addEventListener('click', handleCopyUrl);
+  elements.closeDownloadDialogButton.addEventListener('click', closeDownloadDialog);
+  elements.downloadDialogBackdrop.addEventListener('click', closeDownloadDialog);
   elements.resetDialogBackdrop.addEventListener('click', closeResetDialog);
   elements.cancelResetButton.addEventListener('click', closeResetDialog);
   elements.confirmResetButton.addEventListener('click', handleConfirmReset);
@@ -314,6 +329,10 @@ function attachEventHandlers() {
     if (event.key !== 'Escape') return;
     if (!elements.modal.classList.contains('hidden')) {
       closeDialog();
+      return;
+    }
+    if (!elements.downloadDialog.classList.contains('hidden')) {
+      closeDownloadDialog();
       return;
     }
     if (!elements.resetDialog.classList.contains('hidden')) {
@@ -487,6 +506,54 @@ function closeResetDialog() {
   elements.resetDialog.classList.add('hidden');
   elements.resetDialogBackdrop.classList.add('hidden');
   updateModalOpenState();
+}
+
+function openDownloadDialog({ dataUrl, fileName, title }) {
+  if (!elements.downloadDialog || !elements.downloadPreviewImage || !elements.downloadDirectLink) return;
+  if (!dataUrl) return;
+
+  const instruction = getDownloadInstructionMessage();
+  if (elements.downloadInstructionText) {
+    elements.downloadInstructionText.textContent = instruction;
+  }
+
+  elements.downloadPreviewImage.src = dataUrl;
+  elements.downloadPreviewImage.alt =
+    typeof title === 'string' && title.length > 0 ? `${title} のダウンロード用画像` : 'ダウンロード用の盤面画像';
+
+  elements.downloadDirectLink.href = dataUrl;
+  if (typeof fileName === 'string' && fileName.length > 0) {
+    elements.downloadDirectLink.download = fileName.endsWith('.png') ? fileName : `${fileName}.png`;
+  } else {
+    elements.downloadDirectLink.download = 'board.png';
+  }
+
+  elements.downloadDialog.classList.remove('hidden');
+  elements.downloadDialogBackdrop.classList.remove('hidden');
+  updateModalOpenState();
+  elements.closeDownloadDialogButton?.focus();
+}
+
+function closeDownloadDialog() {
+  if (!elements.downloadDialog) return;
+  elements.downloadDialog.classList.add('hidden');
+  elements.downloadDialogBackdrop?.classList.add('hidden');
+  updateModalOpenState();
+  if (elements.downloadPreviewImage) {
+    elements.downloadPreviewImage.src = '';
+  }
+  if (elements.downloadDirectLink) {
+    elements.downloadDirectLink.href = '#';
+  }
+  elements.downloadButton?.focus();
+}
+
+function getDownloadInstructionMessage() {
+  const coarsePointer = typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+  if (coarsePointer) {
+    return '画像を長押しして保存してください。PCでは右クリックで保存できます。';
+  }
+  return '画像を右クリックして保存してください。スマホでは長押しで保存できます。';
 }
 
 function handleConfirmReset() {
@@ -917,57 +984,14 @@ function downloadBoardAsImage() {
 
   const timestamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 12);
   const dataUrl = canvas.toDataURL('image/png');
-  const windowTitle = boardTitle || `karuta-layout-${timestamp}`;
-  const popup = window.open('', '_blank');
+  const baseTitle = boardTitle || `karuta-layout-${timestamp}`;
+  const sanitizedFileName = baseTitle.replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, '-');
 
-  if (popup && !popup.closed) {
-    popup.document.open();
-    popup.document.write(`<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="utf-8">
-<title>${windowTitle}</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<style>
-  :root {
-    color-scheme: light;
-  }
-  body {
-    margin: 0;
-    background: #f6f6fb;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Rounded Mplus 1c', 'Yu Gothic', 'Noto Sans JP', sans-serif;
-  }
-  main {
-    padding: 24px;
-    text-align: center;
-  }
-  img {
-    max-width: 100%;
-    height: auto;
-    box-shadow: 0 12px 32px rgba(31, 31, 39, 0.12);
-    border-radius: 16px;
-  }
-  p {
-    margin-top: 16px;
-    color: #5c5c6b;
-  }
-</style>
-</head>
-<body>
-  <main>
-    <img src="${dataUrl}" alt="ダウンロード用の盤面画像">
-    <p>画像を長押しまたは右クリックして保存してください。</p>
-  </main>
-</body>
-</html>`);
-    popup.document.close();
-  } else {
-    alert('ポップアップがブロックされています。ブラウザの設定で許可するか、別タブでの表示を許可してから再度ダウンロードしてください。');
-  }
+  openDownloadDialog({
+    dataUrl,
+    fileName: sanitizedFileName || `karuta-layout-${timestamp}`,
+    title: boardTitle || baseTitle
+  });
 }
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
