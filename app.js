@@ -44,6 +44,8 @@ const LOCATION_BY_ID = BOARD_STRUCTURE.flat().reduce((acc, location, index) => {
   return acc;
 }, {});
 
+const STORAGE_KEY = 'kansousen-state-v1';
+
 const state = {
   entries: [],
   dialogStep: 0,
@@ -63,8 +65,16 @@ function init() {
     return;
   }
 
-  state.boardTitle = elements.boardTitleInput.value ?? '';
+  loadPersistedState();
+
+  if (typeof state.boardTitle !== 'string') {
+    state.boardTitle = '';
+  }
+  if (!state.boardTitle && typeof elements.boardTitleInput.value === 'string') {
+    state.boardTitle = elements.boardTitleInput.value;
+  }
   state.currentEntry = createEmptyEntry();
+  elements.boardTitleInput.value = state.boardTitle;
   buildBoardStructure();
   buildLocationPicker();
   buildDecisionButtons();
@@ -81,6 +91,7 @@ function cacheElements() {
   elements.recordList = document.getElementById('record-list');
   elements.openDialogButton = document.getElementById('open-entry-dialog');
   elements.downloadButton = document.getElementById('download-board');
+  elements.resetButton = document.getElementById('reset-board');
   elements.boardTitleInput = document.getElementById('board-title-input');
   elements.boardTitleDisplay = document.getElementById('board-title-display');
   elements.modal = document.getElementById('entry-dialog');
@@ -95,6 +106,80 @@ function cacheElements() {
   elements.ownerButtons = document.getElementById('owner-buttons');
   elements.entrySummary = document.getElementById('entry-summary');
   elements.recordTemplate = document.getElementById('record-item-template');
+  elements.resetDialog = document.getElementById('reset-confirm-dialog');
+  elements.resetDialogBackdrop = document.getElementById('reset-dialog-backdrop');
+  elements.confirmResetButton = document.getElementById('confirm-reset');
+  elements.cancelResetButton = document.getElementById('cancel-reset');
+}
+
+function loadPersistedState() {
+  if (!('localStorage' in window)) return;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (typeof parsed !== 'object' || parsed === null) return;
+
+    const entries = Array.isArray(parsed.entries) ? parsed.entries : [];
+    state.entries = entries
+      .map((entry) => {
+        if (
+          typeof entry !== 'object' ||
+          entry === null ||
+          typeof entry.id !== 'string' ||
+          typeof entry.kimariji !== 'string' ||
+          typeof entry.locationId !== 'string' ||
+          typeof entry.owner !== 'string'
+        ) {
+          return null;
+        }
+        const decisionNumber = Number(entry.decisionNumber);
+        if (!Number.isInteger(decisionNumber)) return null;
+        return {
+          id: entry.id,
+          kimariji: entry.kimariji,
+          locationId: entry.locationId,
+          decisionNumber,
+          owner: entry.owner,
+          formattedText: formatKimariji(entry.kimariji, decisionNumber)
+        };
+      })
+      .filter(Boolean);
+
+    if (typeof parsed.boardTitle === 'string') {
+      state.boardTitle = parsed.boardTitle;
+    }
+  } catch (error) {
+    console.warn('保存されたデータの読み込みに失敗しました:', error);
+  }
+}
+
+function persistState() {
+  if (!('localStorage' in window)) return;
+  try {
+    const payload = {
+      boardTitle: state.boardTitle,
+      entries: state.entries.map((entry) => ({
+        id: entry.id,
+        kimariji: entry.kimariji,
+        locationId: entry.locationId,
+        decisionNumber: entry.decisionNumber,
+        owner: entry.owner
+      }))
+    };
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  } catch (error) {
+    console.warn('状態の保存に失敗しました:', error);
+  }
+}
+
+function clearPersistedState() {
+  if (!('localStorage' in window)) return;
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch (error) {
+    console.warn('状態の削除に失敗しました:', error);
+  }
 }
 
 function validateEssentialElements() {
@@ -103,6 +188,7 @@ function validateEssentialElements() {
     'recordList',
     'openDialogButton',
     'downloadButton',
+    'resetButton',
     'boardTitleInput',
     'boardTitleDisplay',
     'modal',
@@ -115,13 +201,23 @@ function validateEssentialElements() {
     'decisionButtons',
     'ownerButtons',
     'entrySummary',
-    'recordTemplate'
+    'recordTemplate',
+    'resetDialog',
+    'resetDialogBackdrop',
+    'confirmResetButton',
+    'cancelResetButton'
   ];
 
   const missing = essentials.filter((key) => !elements[key]);
   const hasSteps = Array.isArray(elements.dialogSteps) && elements.dialogSteps.length > 0;
 
   return missing.length === 0 && hasSteps;
+}
+
+function updateModalOpenState() {
+  const hasEntryDialog = elements.modal && !elements.modal.classList.contains('hidden');
+  const hasResetDialog = elements.resetDialog && !elements.resetDialog.classList.contains('hidden');
+  document.body.classList.toggle('modal-open', hasEntryDialog || hasResetDialog);
 }
 
 function createEmptyEntry() {
@@ -203,6 +299,10 @@ function attachEventHandlers() {
   elements.nextButton.addEventListener('click', handleNextStep);
   elements.backButton.addEventListener('click', handleBackStep);
   elements.downloadButton.addEventListener('click', downloadBoardAsImage);
+  elements.resetButton.addEventListener('click', openResetDialog);
+  elements.resetDialogBackdrop.addEventListener('click', closeResetDialog);
+  elements.cancelResetButton.addEventListener('click', closeResetDialog);
+  elements.confirmResetButton.addEventListener('click', handleConfirmReset);
   elements.boardTitleInput.addEventListener('input', handleBoardTitleInput);
 
   elements.kimarijiList.addEventListener('click', handleKimarijiClick);
@@ -212,8 +312,13 @@ function attachEventHandlers() {
   elements.recordList.addEventListener('click', handleRecordListClick);
 
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && !elements.modal.classList.contains('hidden')) {
+    if (event.key !== 'Escape') return;
+    if (!elements.modal.classList.contains('hidden')) {
       closeDialog();
+      return;
+    }
+    if (!elements.resetDialog.classList.contains('hidden')) {
+      closeResetDialog();
     }
   });
 }
@@ -244,6 +349,7 @@ function handleBoardTitleInput(event) {
   if (!(target instanceof HTMLInputElement)) return;
   state.boardTitle = target.value;
   updateBoardTitleDisplay();
+  persistState();
 }
 
 function updateBoardTitleDisplay() {
@@ -264,7 +370,7 @@ function openDialog() {
 
   elements.modal.classList.remove('hidden');
   elements.modalBackdrop.classList.remove('hidden');
-  document.body.classList.add('modal-open');
+  updateModalOpenState();
   const firstOption = elements.kimarijiList.querySelector('button');
   if (firstOption) {
     firstOption.focus();
@@ -274,7 +380,33 @@ function openDialog() {
 function closeDialog() {
   elements.modal.classList.add('hidden');
   elements.modalBackdrop.classList.add('hidden');
-  document.body.classList.remove('modal-open');
+  updateModalOpenState();
+}
+
+function openResetDialog() {
+  elements.resetDialog.classList.remove('hidden');
+  elements.resetDialogBackdrop.classList.remove('hidden');
+  updateModalOpenState();
+  elements.confirmResetButton.focus();
+}
+
+function closeResetDialog() {
+  elements.resetDialog.classList.add('hidden');
+  elements.resetDialogBackdrop.classList.add('hidden');
+  updateModalOpenState();
+}
+
+function handleConfirmReset() {
+  state.entries = [];
+  state.boardTitle = '';
+  elements.boardTitleInput.value = '';
+  state.currentEntry = createEmptyEntry();
+  renderBoard();
+  renderRecordList();
+  updateBoardTitleDisplay();
+  updateDownloadState();
+  clearPersistedState();
+  closeResetDialog();
 }
 
 function renderKimarijiOptions() {
@@ -313,8 +445,13 @@ function handleKimarijiClick(event) {
   const { value } = event.target.dataset;
   if (!value) return;
 
+  if (state.currentEntry.kimariji === value) {
+    autoAdvanceAfterSelection(0);
+    return;
+  }
   state.currentEntry.kimariji = value;
   renderKimarijiOptions();
+  autoAdvanceAfterSelection(0);
 }
 
 function handleLocationClick(event) {
@@ -322,8 +459,13 @@ function handleLocationClick(event) {
   const { locationId } = event.target.dataset;
   if (!locationId) return;
 
+  if (state.currentEntry.locationId === locationId) {
+    autoAdvanceAfterSelection(1);
+    return;
+  }
   state.currentEntry.locationId = locationId;
   updateLocationSelection();
+  autoAdvanceAfterSelection(1);
 }
 
 function updateLocationSelection() {
@@ -340,8 +482,14 @@ function handleDecisionClick(event) {
   const { value } = event.target.dataset;
   if (!value) return;
 
-  state.currentEntry.decisionNumber = Number(value);
+  const decisionNumber = Number(value);
+  if (state.currentEntry.decisionNumber === decisionNumber) {
+    autoAdvanceAfterSelection(2);
+    return;
+  }
+  state.currentEntry.decisionNumber = decisionNumber;
   updateDecisionSelection();
+  autoAdvanceAfterSelection(2);
 }
 
 function updateDecisionSelection() {
@@ -385,6 +533,7 @@ function handleRecordListClick(event) {
   renderBoard();
   renderRecordList();
   updateDownloadState();
+  persistState();
 }
 
 function handleNextStep() {
@@ -396,11 +545,13 @@ function handleNextStep() {
 
   const nextStep = state.dialogStep + 1;
   setActiveStep(nextStep);
+  focusStepFirstElement(nextStep);
 }
 
 function handleBackStep() {
   const previous = Math.max(0, state.dialogStep - 1);
   setActiveStep(previous);
+  focusStepFirstElement(previous);
 }
 
 function setActiveStep(stepIndex) {
@@ -410,6 +561,17 @@ function setActiveStep(stepIndex) {
   });
   updateStepControls();
   maybeUpdateSummary();
+}
+
+function focusStepFirstElement(stepIndex) {
+  const step = elements.dialogSteps?.[stepIndex];
+  if (!step) return;
+  const focusable = step.querySelector(
+    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  );
+  if (focusable instanceof HTMLElement) {
+    focusable.focus();
+  }
 }
 
 function updateStepControls() {
@@ -445,6 +607,16 @@ function isFinalStep() {
   return state.dialogStep === elements.dialogSteps.length - 1;
 }
 
+function autoAdvanceAfterSelection(stepIndex) {
+  const finalIndex = elements.dialogSteps.length - 1;
+  if (stepIndex >= finalIndex) return;
+  if (state.dialogStep !== stepIndex) return;
+  if (!isCurrentStepComplete()) return;
+  const nextStep = stepIndex + 1;
+  setActiveStep(nextStep);
+  focusStepFirstElement(nextStep);
+}
+
 function saveEntry() {
   if (!isCurrentStepComplete()) return;
 
@@ -463,6 +635,7 @@ function saveEntry() {
   renderBoard();
   renderRecordList();
   updateDownloadState();
+  persistState();
 }
 
 function renderBoard() {

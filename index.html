@@ -21,6 +21,7 @@
         <div class="actions-buttons">
           <button type="button" id="open-entry-dialog" class="primary">取札を追加</button>
           <button type="button" id="download-board" class="secondary">画像としてダウンロード</button>
+          <button type="button" id="reset-board" class="danger">登録内容をリセット</button>
         </div>
         <label for="board-title-input" class="board-title-field">
           <input type="text" id="board-title-input" name="board-title-input" placeholder="画像に表示するメモを入力" autocomplete="off" />
@@ -80,6 +81,17 @@
     </div>
 
     <div id="dialog-backdrop" class="modal-backdrop hidden"></div>
+    <div id="reset-confirm-dialog" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="reset-dialog-title">
+      <div class="modal-content confirm-dialog-content">
+        <h2 id="reset-dialog-title">登録内容をリセット</h2>
+        <p class="confirm-dialog-message">保存された配置図とメモをすべて削除します。よろしいですか？</p>
+        <div class="confirm-dialog-actions">
+          <button type="button" class="danger" id="confirm-reset">リセットする</button>
+          <button type="button" class="ghost" id="cancel-reset">キャンセル</button>
+        </div>
+      </div>
+    </div>
+    <div id="reset-dialog-backdrop" class="modal-backdrop hidden"></div>
 
     <template id="record-item-template">
       <li class="record-item">

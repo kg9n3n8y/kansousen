@@ -68,7 +68,8 @@ main {
 }
 
 #open-entry-dialog,
-#download-board {
+#download-board,
+#reset-board {
   min-width: 230px;
 }
 
@@ -137,6 +138,15 @@ button.secondary {
 
 button.secondary:hover:not(:disabled) {
   background: rgba(58, 111, 242, 0.18);
+}
+
+button.danger {
+  color: #fff;
+  background: var(--danger-color);
+}
+
+button.danger:hover:not(:disabled) {
+  background: #b51f1f;
 }
 
 button.ghost {
@@ -508,6 +518,33 @@ button.ghost:hover:not(:disabled) {
 
 .modal-backdrop.hidden {
   display: none;
+}
+
+.confirm-dialog-content {
+  width: min(360px, 100%);
+  text-align: center;
+  gap: 1.25rem;
+}
+
+.confirm-dialog-content h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.confirm-dialog-message {
+  margin: 0;
+  color: var(--muted-text);
+  line-height: 1.5;
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.confirm-dialog-actions button {
+  width: 100%;
 }
 
 @media (max-width: 640px) {
