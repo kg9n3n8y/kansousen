@@ -180,8 +180,7 @@ button.ghost:hover:not(:disabled) {
   box-shadow: var(--shadow-md);
 }
 
-.board-section h2,
-.records-section h2 {
+.board-section h2 {
   margin-top: 0;
   font-size: 1.35rem;
 }
@@ -238,7 +237,7 @@ button.ghost:hover:not(:disabled) {
 .board-slot .slot-items {
   padding: 1.5rem 1.25rem;
   display: flex;
-  gap: 1.25rem;
+  gap: 0.6rem;
   width: 100%;
   align-items: flex-start;
   justify-content: flex-start;
@@ -257,14 +256,18 @@ button.ghost:hover:not(:disabled) {
   display: inline-flex;
   line-height: 1.25;
   align-items: flex-start;
+  cursor: pointer;
+  padding: 0.35rem 0.25rem;
+  border-radius: 8px;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .board-slot[data-column="left"] .card-text {
-  margin-right: 0.75rem;
+  margin-right: 0.35rem;
 }
 
 .board-slot[data-column="right"] .card-text {
-  margin-left: 0.75rem;
+  margin-left: 0.35rem;
 }
 
 .card-text.owner-self {
@@ -275,53 +278,30 @@ button.ghost:hover:not(:disabled) {
   color: var(--danger-color);
 }
 
-.records-section {
-  margin-top: 2.5rem;
-  background: var(--surface-color);
-  border-radius: var(--radius-md);
-  padding: 1.5rem;
-  box-shadow: var(--shadow-md);
+.card-text:focus-visible,
+.card-text:hover {
+  outline: none;
+  background-color: rgba(58, 111, 242, 0.08);
+  box-shadow: 0 0 0 2px rgba(58, 111, 242, 0.18);
 }
 
-.records-hint {
-  margin-top: 0.25rem;
+.card-text:active {
+  transform: translateY(1px);
+}
+
+.board-legend {
+  margin: 1.25rem 0 0;
+  text-align: center;
+  font-size: 0.85rem;
   color: var(--muted-text);
-  font-size: 0.95rem;
 }
 
-.record-list {
-  list-style: none;
-  padding: 0;
-  margin: 1.5rem 0 0;
+.copy-url-wrapper {
+  margin: 2.5rem auto 0;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-}
-
-.record-item {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.85rem 1rem;
-  background: #f7f7fb;
-  border-radius: 12px;
-  border: 1px solid #ededf7;
-  gap: 1rem;
-}
-
-.record-item .record-main {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.record-item .record-kimariji {
-  font-weight: 600;
-}
-
-.record-item .record-meta {
-  color: var(--muted-text);
-  font-size: 0.9rem;
+  gap: 0.75rem;
 }
 
 .modal {
@@ -469,6 +449,10 @@ button.ghost:hover:not(:disabled) {
   cursor: pointer;
   font-size: 1.05rem;
   transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.owner-option {
+  padding-block: 0.75rem;
 }
 
 .option-chip:hover {

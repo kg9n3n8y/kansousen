@@ -1,7 +1,7 @@
 {
   "lang": "ja",
-  "name": "かるた試合後分析ツール",
-  "short_name": "かるた分析",
+  "name": "札跡 -試合後分析-",
+  "short_name": "札跡",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
