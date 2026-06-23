@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'],
+      includeAssets: ['icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png', 'thumbnail.png'],
       manifest: {
         lang: 'ja',
         name: '札跡 -試合後分析-',
