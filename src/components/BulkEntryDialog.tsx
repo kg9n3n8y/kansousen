@@ -29,25 +29,25 @@ export function BulkEntryDialog({ open, matchId, onClose, findEntryByKimariji, o
   const [draft, setDraft] = useState<DraftEntry>({ kimariji: null, locationId: null, decisionNumber: null, owner: null });
   const [baseEntry, setBaseEntry] = useState<Entry | null>(null);
   const skipIndexLoadRef = useRef(false);
+  const openSessionRef = useRef(false);
+  const findEntryByKimarijiRef = useRef(findEntryByKimariji);
+  findEntryByKimarijiRef.current = findEntryByKimariji;
 
   const kimariji = KIMARIJI_LIST[currentIndex];
   const isLast = currentIndex === KIMARIJI_LIST.length - 1;
 
-  const loadCardAtIndex = useCallback(
-    (index: number, options?: { restoreStep?: number }) => {
-      const cardKimariji = KIMARIJI_LIST[index];
-      const existing = findEntryByKimariji(cardKimariji);
-      setBaseEntry(existing);
-      setDraft({
-        kimariji: cardKimariji,
-        locationId: existing?.locationId ?? null,
-        decisionNumber: existing?.decisionNumber ?? null,
-        owner: existing?.owner ?? null
-      });
-      setStep(options?.restoreStep ?? 0);
-    },
-    [findEntryByKimariji]
-  );
+  const loadCardAtIndex = useCallback((index: number, options?: { restoreStep?: number }) => {
+    const cardKimariji = KIMARIJI_LIST[index];
+    const existing = findEntryByKimarijiRef.current(cardKimariji);
+    setBaseEntry(existing);
+    setDraft({
+      kimariji: cardKimariji,
+      locationId: existing?.locationId ?? null,
+      decisionNumber: existing?.decisionNumber ?? null,
+      owner: existing?.owner ?? null
+    });
+    setStep(options?.restoreStep ?? 0);
+  }, []);
 
   const handleClose = useCallback(
     (completed = false) => {
@@ -62,7 +62,13 @@ export function BulkEntryDialog({ open, matchId, onClose, findEntryByKimariji, o
   );
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      openSessionRef.current = false;
+      return;
+    }
+    if (openSessionRef.current) return;
+    openSessionRef.current = true;
+
     const saved = loadBulkProgress(matchId);
     const index = saved?.currentIndex ?? 0;
     const restoreStep = saved?.step ?? 0;
