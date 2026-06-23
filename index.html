@@ -1,127 +1,28 @@
 <!DOCTYPE html>
 <html lang="ja">
   <head>
-    <meta property="og:title" content="札跡 -試合後分析-">
-    <meta property="og:description" content="かるた試合後分析ツール">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://kg9n3n8y.github.io/kansousen/">
-    <meta property="og:image" content="https://kg9n3n8y.github.io/kansousen/thumbnail.png">
-    <meta property="og:site_name" content="札跡 -試合後分析-">
-    <meta property="og:locale" content="ja_JP">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="札跡 -試合後分析-">
-    <meta name="twitter:description" content="かるた試合後分析ツール">
-    <meta name=”twitter:image” content=”https://kg9n3n8y.github.io/kansousen/thumbnail.png” />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#3a6ff2" />
+    <meta name="theme-color" content="#2c4a6e" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="札跡 -試合後分析-" />
+    <meta name="apple-mobile-web-app-title" content="札跡" />
+    <meta property="og:title" content="札跡 -試合後分析-" />
+    <meta property="og:description" content="かるた試合後分析ツール" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://kg9n3n8y.github.io/kansousen/" />
+    <meta property="og:image" content="https://kg9n3n8y.github.io/kansousen/thumbnail.png" />
+    <meta property="og:site_name" content="札跡 -試合後分析-" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="札跡 -試合後分析-" />
+    <meta name="twitter:description" content="かるた試合後分析ツール" />
+    <meta name="twitter:image" content="https://kg9n3n8y.github.io/kansousen/thumbnail.png" />
+    <link rel="apple-touch-icon" href="/kansousen/icons/icon-180.png" />
     <title>札跡 -試合後分析-</title>
-    <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="apple-touch-icon" href="icons/icon-180.png" />
-    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header class="app-header">
-      <h1><ruby><rb>札跡</rb><rp>（</rp><rt>ふだあと</rt><rp>）</rp></ruby></h1>
-      <p class="subtitle">かるた試合後分析ツール</p>
-    </header>
-    <main>
-      <section class="actions">
-        <div class="actions-buttons">
-          <button type="button" id="open-entry-dialog" class="primary">取札を追加</button>
-          <button type="button" id="download-board" class="secondary">画像で出力</button>
-        </div>
-        <label for="board-title-input" class="board-title-field">
-          <input type="text" id="board-title-input" name="board-title-input" placeholder="画像に表示するメモを入力" autocomplete="off" />
-        </label>
-      </section>
-
-      <section class="board-section">
-        <h2>配置図</h2>
-        <div id="board-title-display" class="board-title-display" aria-live="polite"></div>
-        <div class="board-scroll">
-          <div id="board" class="board-grid" aria-live="polite"></div>
-        </div>
-        <p class="board-legend">黒字は自分の取り　赤字は相手の取り</p>
-      </section>
-
-      <div class="copy-url-wrapper">
-        <button type="button" id="reset-board" class="danger">登録内容をリセット</button>
-        <button type="button" id="copy-url" class="secondary">URLをコピー</button>
-      </div>
-    </main>
-
-    <div id="entry-dialog" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2 id="dialog-title">取札を追加</h2>
-          <button type="button" class="icon-button" id="close-dialog" aria-label="閉じる">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="dialog-step" data-step="0">
-            <h3>1. 札を選ぶ</h3>
-            <div id="kimariji-list" class="kimariji-list" role="listbox" aria-label="決まり字一覧"></div>
-          </div>
-
-          <div class="dialog-step" data-step="1">
-            <h3>2. 取った/取られた場所</h3>
-            <div id="location-picker" class="location-picker" role="listbox" aria-label="札を取った場所"></div>
-          </div>
-
-          <div class="dialog-step" data-step="2">
-            <h3>3. 何字決まり？</h3>
-            <p class="step-note">取ったときの決まり字を選択</p>
-            <div id="decision-buttons" class="option-row" role="radiogroup" aria-label="何字決まり"></div>
-          </div>
-
-          <div class="dialog-step" data-step="3">
-            <h3>4. どちらが取った？</h3>
-            <p class="step-note">札を取ったのが自分か相手か</p>
-            <div id="owner-buttons" class="option-row" role="radiogroup" aria-label="誰が取ったか"></div>
-            <div class="summary" id="entry-summary"></div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="secondary" id="back-step">戻る</button>
-          <button type="button" class="primary" id="next-step">次へ</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="dialog-backdrop" class="modal-backdrop hidden"></div>
-    <div id="download-dialog" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="download-dialog-title">
-      <div class="modal-content download-dialog-content">
-        <div class="modal-header">
-          <h2 id="download-dialog-title">画像を保存</h2>
-          <button type="button" class="icon-button" id="close-download-dialog" aria-label="閉じる">&times;</button>
-        </div>
-        <div class="modal-body download-dialog-body">
-          <div class="download-preview-wrapper">
-            <img id="download-preview-image" src="" alt="ダウンロード用の盤面画像" loading="lazy" />
-          </div>
-          <p class="download-instruction" id="download-instruction-text">
-            画像を長押しまたは右クリックして保存してください。
-          </p>
-          <a id="download-direct-link" class="download-direct-link secondary" href="#" download>画像を保存</a>
-        </div>
-      </div>
-    </div>
-    <div id="download-dialog-backdrop" class="modal-backdrop hidden"></div>
-    <div id="reset-confirm-dialog" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="reset-dialog-title">
-      <div class="modal-content confirm-dialog-content">
-        <h2 id="reset-dialog-title">登録内容をリセット</h2>
-        <p class="confirm-dialog-message">保存された配置図とメモをすべて削除します。よろしいですか？</p>
-        <div class="confirm-dialog-actions">
-          <button type="button" class="danger" id="confirm-reset">リセットする</button>
-          <button type="button" class="ghost" id="cancel-reset">キャンセル</button>
-        </div>
-      </div>
-    </div>
-    <div id="reset-dialog-backdrop" class="modal-backdrop hidden"></div>
-
-    <script src="app.js" defer></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
