@@ -228,19 +228,15 @@ export function BulkEntryDialog({ open, matchId, onClose, findEntryByKimariji, o
         <h3 className="text-sm font-bold text-sumi">{STEP_TITLES[step]}</h3>
 
         {step === 0 && (
-          <OptionRow
-            bulk
-            compact
-            options={OWNER_OPTIONS}
-            selected={draft.owner}
-            onSelect={handleOwnerSelect}
-            vertical
-          />
-        )}
-
-        {step === 1 && (
           <>
-            <LocationPicker bulk compact selectedId={draft.locationId} onSelect={handleLocationSelect} />
+            <OptionRow
+              bulk
+              compact
+              options={OWNER_OPTIONS}
+              selected={draft.owner}
+              onSelect={handleOwnerSelect}
+              vertical
+            />
             <Button
               variant="ghost"
               fullWidth
@@ -250,6 +246,10 @@ export function BulkEntryDialog({ open, matchId, onClose, findEntryByKimariji, o
               空札（スキップ）
             </Button>
           </>
+        )}
+
+        {step === 1 && (
+          <LocationPicker bulk compact selectedId={draft.locationId} onSelect={handleLocationSelect} />
         )}
 
         {step === 2 && (
