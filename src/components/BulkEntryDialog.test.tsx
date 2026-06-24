@@ -7,7 +7,13 @@ import type { Entry } from '../types';
 import { formatKimariji } from '../utils/formatKimariji';
 import { BulkEntryDialog } from './BulkEntryDialog';
 
-function BulkEntryHarness({ matchId = 'test-match' }: { matchId?: string }) {
+function BulkEntryHarness({
+  matchId = 'test-match',
+  onSkip = vi.fn()
+}: {
+  matchId?: string;
+  onSkip?: (kimariji: string) => void;
+}) {
   const [open, setOpen] = useState(true);
   const [entries, setEntries] = useState<Entry[]>([]);
 
@@ -35,6 +41,14 @@ function BulkEntryHarness({ matchId = 'test-match' }: { matchId?: string }) {
     []
   );
 
+  const handleSkip = useCallback(
+    (kimariji: string) => {
+      onSkip(kimariji);
+      setEntries((prev) => prev.filter((entry) => entry.kimariji !== kimariji));
+    },
+    [onSkip]
+  );
+
   return (
     <BulkEntryDialog
       open={open}
@@ -42,7 +56,7 @@ function BulkEntryHarness({ matchId = 'test-match' }: { matchId?: string }) {
       onClose={() => setOpen(false)}
       findEntryByKimariji={findEntryByKimariji}
       onSave={onSave}
-      onSkip={vi.fn()}
+      onSkip={handleSkip}
     />
   );
 }
@@ -84,5 +98,22 @@ describe('BulkEntryDialog', () => {
     await waitFor(() => {
       expect(screen.getByText(KIMARIJI_LIST[2])).toBeInTheDocument();
     });
+  });
+
+  it('ステップ1で空札（スキップ）を選ぶと次の札へ進む', async () => {
+    const user = userEvent.setup();
+    const onSkip = vi.fn();
+    render(<BulkEntryHarness onSkip={onSkip} />);
+
+    expect(screen.getByText(KIMARIJI_LIST[0])).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '空札（スキップ）' }));
+
+    expect(onSkip).toHaveBeenCalledWith(KIMARIJI_LIST[0]);
+
+    await waitFor(() => {
+      expect(screen.getByText(KIMARIJI_LIST[1])).toBeInTheDocument();
+    });
+    expect(screen.getByRole('tab', { name: /ステップ1/ })).toHaveAttribute('aria-selected', 'true');
   });
 });
